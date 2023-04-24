@@ -18,13 +18,13 @@ public class MyAccessibilityService extends AccessibilityService {
         //Log.e(TAG, "onAccessibilityEvent: ");t
         String s=String.valueOf(event.getText());
         if(!(s.contains("[]")) & !String.valueOf(event.getText()).contains("Notification"))
-            Log.e(TAG,s);
+            Log.i(TAG,s);
             if(String.valueOf(event.getText()).contains("Notification")||String.valueOf(event.getText()).contains("Quick setting"))
                 Log.e(TAG,"Notification shade");
         final int eventType = event.getEventType();
         switch (eventType) {
             case AccessibilityEvent.TYPE_VIEW_CLICKED:
-                Log.e(TAG, "Click");
+                Log.i(TAG, "Click");
 
                 AccessibilityNodeInfo sourceNode = event.getSource();
 
@@ -33,20 +33,20 @@ public class MyAccessibilityService extends AccessibilityService {
                     sourceNode.getBoundsInScreen(bounds);
                     int touchX = bounds.centerX();
                     int touchY = bounds.centerY();
-                    Log.e(TAG, "Touch Location is X=" + touchX + " Y=" + touchY);
+                    Log.i(TAG, "Touch Location is X=" + touchX + " Y=" + touchY);
                 }
                 break;
 
             case AccessibilityEvent.TYPE_VIEW_LONG_CLICKED:
 
-                Log.e(TAG, "Long Click");
+                Log.i(TAG, "Long Click");
                 AccessibilityNodeInfo sourceNode2 = event.getSource();
                 if (sourceNode2 != null) {
                     Rect bounds = new Rect();
                     sourceNode2.getBoundsInScreen(bounds);
                     int touchX = bounds.centerX();
                     int touchY = bounds.centerY();
-                    Log.e(TAG, "Touch Location is X=" + touchX + " Y=" + touchY);
+                    Log.i(TAG, "Touch Location is X=" + touchX + " Y=" + touchY);
                 }
                 break;
 
@@ -83,7 +83,7 @@ public class MyAccessibilityService extends AccessibilityService {
             info.notificationTimeout = 10;
 
             this.setServiceInfo(info);
-            Log.e(TAG, "onServiceConnected: ");
+            Log.i(TAG, "onServiceConnected: ");
         }
 
         private static void findPopups (AccessibilityNodeInfo nodeInfo){
@@ -93,7 +93,7 @@ public class MyAccessibilityService extends AccessibilityService {
             for (int i = 0; i < nodeInfo.getChildCount(); i++) {
                 AccessibilityNodeInfo childNodeInfo = nodeInfo.getChild(i);
                 if (childNodeInfo.getClassName().equals("PopupWindow")){
-                    Log.e(TAG,"Popup detected");}
+                    Log.i(TAG,"Popup detected");}
 
                 else {
                     Log.e(TAG,childNodeInfo.getClassName().toString());
