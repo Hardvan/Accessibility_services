@@ -17,6 +17,9 @@ public class MyAccessibilityService extends AccessibilityService {
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         //Log.e(TAG, "onAccessibilityEvent: ");
+            String s=String.valueOf(event.getText());
+        if(!(s.contains("[]")) & !String.valueOf(event.getText()).contains("Notification"))
+            Log.e(TAG,s);
             if(String.valueOf(event.getText()).contains("Notification")||String.valueOf(event.getText()).contains("Quick setting"))
                 Log.e(TAG,"Notification shade");
         final int eventType = event.getEventType();
@@ -58,19 +61,8 @@ public class MyAccessibilityService extends AccessibilityService {
 
             if (packageName.equals("android")) {
                 Log.e(TAG, "The app has crashed");
-            } else {
-                try {
-                    ApplicationInfo applicationinfo = packageManager.getApplicationInfo(packageName, 0);
-                    CharSequence applicationlabel = packageManager.getApplicationLabel(applicationinfo);
-                    String windowTitle = event.getClassName().toString();
-                    if(windowTitle.equals("com.android.systemui.recents.RecentsActivity"))
-                            Log.e(TAG,"Recent Activity open");
-
-                    if (!applicationlabel.equals("Google App"))
-                        Log.e(TAG, "The app name is " + applicationlabel);
-                } catch (PackageManager.NameNotFoundException e) {
-                    Log.e(TAG, "Name not found");
-                }
+            } 
+                
             }
         }
 
