@@ -3,7 +3,6 @@ package com.example.test;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.util.Log;
@@ -16,8 +15,8 @@ public class MyAccessibilityService extends AccessibilityService {
     @SuppressLint("SuspiciousIndentation")
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        //Log.e(TAG, "onAccessibilityEvent: ");
-            String s=String.valueOf(event.getText());
+        //Log.e(TAG, "onAccessibilityEvent: ");t
+        String s=String.valueOf(event.getText());
         if(!(s.contains("[]")) & !String.valueOf(event.getText()).contains("Notification"))
             Log.e(TAG,s);
             if(String.valueOf(event.getText()).contains("Notification")||String.valueOf(event.getText()).contains("Quick setting"))
@@ -25,7 +24,6 @@ public class MyAccessibilityService extends AccessibilityService {
         final int eventType = event.getEventType();
         switch (eventType) {
             case AccessibilityEvent.TYPE_VIEW_CLICKED:
-
                 Log.e(TAG, "Click");
 
                 AccessibilityNodeInfo sourceNode = event.getSource();
@@ -55,14 +53,13 @@ public class MyAccessibilityService extends AccessibilityService {
 
         }
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+
             AccessibilityNodeInfo rootNodeInfo = getRootInActiveWindow();
             String packageName = event.getPackageName().toString();
             PackageManager packageManager = this.getPackageManager();
 
             if (packageName.equals("android")) {
                 Log.e(TAG, "The app has crashed");
-            } 
-                
             }
         }
 
