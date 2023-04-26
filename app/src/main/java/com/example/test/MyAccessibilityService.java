@@ -15,13 +15,22 @@ public class MyAccessibilityService extends AccessibilityService {
     @SuppressLint({"SuspiciousIndentation", "SwitchIntDef"})
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        //Log.e(TAG, "onAccessibilityEvent: ");t
+         //Log.e(TAG, "onAccessibilityEvent: ");t
 
         // ? Get the text of the event
         String s = String.valueOf(event.getText());
-        if(!(s.contains("[]")) && !String.valueOf(event.getText()).contains("Notification"))
-            Log.i(TAG,s); // Print the text of the event (EG: [Home 1 of 1]
-        if(String.valueOf(event.getText()).contains("Notification")||String.valueOf(event.getText()).contains("Quick setting"))
+
+        // Check if the event text is empty
+        boolean check_empty = s.contains("[]");
+        // Check if the event text is a notification
+        boolean check_notification = s.contains("Notification");
+        // Check if the event text is a quick setting
+        boolean check_quick_settings = s.contains("Quick setting");
+
+        if(!check_empty && !check_notification)
+            Log.i(TAG, s); // Print the text of the event (EG: [Home 1 of 1])
+
+        if(check_notification || check_quick_settings)
             Log.e(TAG,"Notification shade");
 
         final int eventType = event.getEventType();
@@ -92,19 +101,23 @@ public class MyAccessibilityService extends AccessibilityService {
         Log.i(TAG, "onServiceConnected: ");
     }
 
-    private static void findPopups (AccessibilityNodeInfo nodeInfo){
+    private static void findPopups (AccessibilityNodeInfo nodeInfo) {
+        // If the node is a leaf node, return
         if (nodeInfo.getChildCount() == 0) {
             return;
         }
+
+        // ? Check if the node is a popup
         for (int i = 0; i < nodeInfo.getChildCount(); i++) {
             AccessibilityNodeInfo childNodeInfo = nodeInfo.getChild(i);
-            if (childNodeInfo.getClassName().equals("PopupWindow")) {
+
+            boolean check_popup = childNodeInfo.getClassName().equals("PopupWindow");
+            if (check_popup) {
                 Log.i(TAG,"Popup detected");
             }
-
             else {
-                Log.e(TAG,childNodeInfo.getClassName().toString());
-                findPopups(childNodeInfo);
+                Log.e(TAG, childNodeInfo.getClassName().toString());
+                findPopups(childNodeInfo); // Recursively check the children of the node
             }
         }
     }
