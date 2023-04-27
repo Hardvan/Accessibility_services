@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class MyAccessibilityService extends AccessibilityService {
     int c = 0;
@@ -113,12 +114,34 @@ public class MyAccessibilityService extends AccessibilityService {
                 break;
         }
 
-        // Iterate through the HashMap and print the details of the event
-        for (String key : eventDetailsMap.keySet()) {
-            String value = eventDetailsMap.get(key);
-            Log.i(TAG, key + " : " + value);
+        // Get the event's resource-id, text, content-desc, index
+        AccessibilityNodeInfo sourceNode = event.getSource();
+        if (sourceNode != null) {
+            String resourceId = String.valueOf(sourceNode.getViewIdResourceName());
+            eventDetailsMap.put("resourceId", resourceId);
+
+            CharSequence contentDesc = sourceNode.getContentDescription();
+            eventDetailsMap.put("contentDesc", String.valueOf(contentDesc));
+
+            AccessibilityNodeInfo.CollectionItemInfo collectionItemInfo = sourceNode.getCollectionItemInfo();
+            if (collectionItemInfo != null) {
+                int rowIndex = collectionItemInfo.getRowIndex();
+                eventDetailsMap.put("rowIndex", String.valueOf(rowIndex));
+
+                int columnIndex = collectionItemInfo.getColumnIndex();
+                eventDetailsMap.put("columnIndex", String.valueOf(columnIndex));
+            }
         }
-        Log.i(TAG, "------------------");
+
+        // Iterate through the HashMap and print the details of the event
+        boolean is_other = Objects.equals(eventDetailsMap.get("eventTypeStr"), "Other");
+        if (!is_other) {
+            for (String key : eventDetailsMap.keySet()) {
+                String value = eventDetailsMap.get(key);
+                Log.i(TAG, key + " : " + value);
+            }
+            Log.i(TAG, "------------------");
+        }
     }
 
     @Override
