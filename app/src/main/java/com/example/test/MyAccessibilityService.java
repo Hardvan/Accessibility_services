@@ -8,16 +8,20 @@ import android.graphics.Rect;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+
 import java.util.HashMap;
 import java.util.Objects;
+
+// ? Press Ctrl+Alt+L to format the code
 
 public class MyAccessibilityService extends AccessibilityService {
     int c = 0;
     private static final String TAG = "MyAccessibilityService";
+
     @SuppressLint({"SuspiciousIndentation", "SwitchIntDef"})
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-         //Log.e(TAG, "onAccessibilityEvent: ");t
+        //Log.e(TAG, "onAccessibilityEvent: ");t
 
         // ? HashMap to store the details of the event
         HashMap<String, String> eventDetailsMap = new HashMap<>();
@@ -26,41 +30,30 @@ public class MyAccessibilityService extends AccessibilityService {
         String eventText = String.valueOf(event.getText());
         eventDetailsMap.put("eventText", eventText);
 
-        // Check if the event text is empty
         boolean check_empty = eventText.contains("[]");
-        // Check if the event text is a notification
         boolean check_notification = eventText.contains("Notification");
-        // Check if the event text is a quick setting
         boolean check_quick_settings = eventText.contains("Quick setting");
-
-        if(!check_empty && !check_notification) {
+        if (!check_empty && !check_notification) {
             // Log.i(TAG, eventText); // Print the text of the event (EG: [Home 1 of 1])
         }
-
-        if(check_notification || check_quick_settings) {
+        if (check_notification || check_quick_settings) {
             Log.e(TAG, "Notification shade");
         }
 
-        // ? Get the event type and X,Y coordinates
+        // ? Get the event type
         final int eventType = event.getEventType();
         String eventTypeStr = "";
-        
-        int touchX = -1;
-        int touchY = -1;
         switch (eventType) {
-
             // * Click event
             case AccessibilityEvent.TYPE_VIEW_CLICKED:
                 eventTypeStr = "Click";
                 eventDetailsMap.put("eventTypeStr", eventTypeStr);
-
                 break;
 
             // * Long click event
             case AccessibilityEvent.TYPE_VIEW_LONG_CLICKED:
                 eventTypeStr = "Long Click";
                 eventDetailsMap.put("eventTypeStr", eventTypeStr);
-
                 break;
 
             // * Window state changed event
@@ -80,11 +73,10 @@ public class MyAccessibilityService extends AccessibilityService {
             default:
                 eventTypeStr = "Other";
                 eventDetailsMap.put("eventTypeStr", eventTypeStr);
-
                 break;
         }
 
-        // Get the event's resource-id, text, content-desc, index, touchX, touchY
+        // Get the event's resource-id, text, content-desc, index, touchX, touchY, time
         AccessibilityNodeInfo sourceNode = event.getSource();
         if (sourceNode != null) {
             // Resource-id
@@ -108,8 +100,8 @@ public class MyAccessibilityService extends AccessibilityService {
             // For touchX and touchY
             Rect bounds = new Rect();
             sourceNode.getBoundsInScreen(bounds);
-            touchX = bounds.centerX();
-            touchY = bounds.centerY();
+            int touchX = bounds.centerX();
+            int touchY = bounds.centerY();
             eventDetailsMap.put("touchX", String.valueOf(touchX));
             eventDetailsMap.put("touchY", String.valueOf(touchY));
         }
@@ -118,6 +110,7 @@ public class MyAccessibilityService extends AccessibilityService {
         boolean is_other = Objects.equals(eventDetailsMap.get("eventTypeStr"), "Other");
         if (!is_other) {
             displayEventsMap(eventDetailsMap);
+//            saveEventsMap(eventDetailsMap);
         }
     }
 
@@ -130,12 +123,12 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     @Override
-    public void onInterrupt () {
+    public void onInterrupt() {
         Log.e(TAG, "onInterrupt: unexpected error");
     }
 
     @Override
-    protected void onServiceConnected () {
+    protected void onServiceConnected() {
         super.onServiceConnected();
         AccessibilityServiceInfo info = new AccessibilityServiceInfo();
         info.eventTypes = AccessibilityEvent.TYPES_ALL_MASK;
@@ -149,7 +142,7 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     // ! Currently, this function is not used
-    private static void findPopups (AccessibilityNodeInfo nodeInfo) {
+    private static void findPopups(AccessibilityNodeInfo nodeInfo) {
         // If the node is a leaf node, return
         if (nodeInfo.getChildCount() == 0) {
             return;
@@ -161,9 +154,8 @@ public class MyAccessibilityService extends AccessibilityService {
 
             boolean check_popup = childNodeInfo.getClassName().equals("PopupWindow");
             if (check_popup) {
-                Log.i(TAG,"Popup detected");
-            }
-            else {
+                Log.i(TAG, "Popup detected");
+            } else {
                 Log.e(TAG, childNodeInfo.getClassName().toString());
                 findPopups(childNodeInfo); // Recursively check the children of the node
             }
