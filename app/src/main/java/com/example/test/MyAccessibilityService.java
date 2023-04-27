@@ -33,12 +33,18 @@ public class MyAccessibilityService extends AccessibilityService {
         if(check_notification || check_quick_settings)
             Log.e(TAG,"Notification shade");
 
+        // ? Get the event type and X,Y coordinates
         final int eventType = event.getEventType();
+        String eventTypeStr = "";
+        
+        int touchX = -1;
+        int touchY = -1;
         switch (eventType) {
 
             // * Click event
             case AccessibilityEvent.TYPE_VIEW_CLICKED:
-                Log.i(TAG, "Click");
+                eventTypeStr = "Click";
+                Log.i(TAG, "Event type: " + eventTypeStr);
 
                 AccessibilityNodeInfo sourceNode = event.getSource();
 
@@ -46,8 +52,8 @@ public class MyAccessibilityService extends AccessibilityService {
                 if (sourceNode != null) {
                     Rect bounds = new Rect();
                     sourceNode.getBoundsInScreen(bounds);
-                    int touchX = bounds.centerX();
-                    int touchY = bounds.centerY();
+                    touchX = bounds.centerX();
+                    touchY = bounds.centerY();
                     Log.i(TAG, "Touch Location is X=" + touchX + " Y=" + touchY);
                 }
                 break;
@@ -55,30 +61,41 @@ public class MyAccessibilityService extends AccessibilityService {
             // * Long click event
             case AccessibilityEvent.TYPE_VIEW_LONG_CLICKED:
 
-                Log.i(TAG, "Long Click");
+                eventTypeStr = "Long Click";
+                Log.i(TAG, "Event type: " + eventTypeStr);
+
                 AccessibilityNodeInfo sourceNode2 = event.getSource();
 
                 // ? Get the location of the long click
                 if (sourceNode2 != null) {
                     Rect bounds = new Rect();
                     sourceNode2.getBoundsInScreen(bounds);
-                    int touchX = bounds.centerX();
-                    int touchY = bounds.centerY();
+                    touchX = bounds.centerX();
+                    touchY = bounds.centerY();
                     Log.i(TAG, "Touch Location is X=" + touchX + " Y=" + touchY);
                 }
                 break;
-        }
 
-        // Detect if the app has crashed
-        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            // * Window state changed event
+            case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
 
-            AccessibilityNodeInfo rootNodeInfo = getRootInActiveWindow();
-            String packageName = event.getPackageName().toString();
-            PackageManager packageManager = this.getPackageManager();
+                eventTypeStr = "Window State Changed";
+                Log.i(TAG, "Event type: " + eventTypeStr);
 
-            if (packageName.equals("android")) {
-                Log.e(TAG, "The app has crashed");
-            }
+                // Detect if the app has crashed
+                AccessibilityNodeInfo rootNodeInfo = getRootInActiveWindow();
+                String packageName = event.getPackageName().toString();
+                PackageManager packageManager = this.getPackageManager();
+                if (packageName.equals("android")) {
+                    Log.e(TAG, "The app has crashed");
+                }
+                break;
+
+            default:
+                eventTypeStr = "Other";
+                Log.i(TAG, "Event type: " + eventTypeStr);
+
+                break;
         }
     }
 
@@ -101,6 +118,7 @@ public class MyAccessibilityService extends AccessibilityService {
         Log.i(TAG, "onServiceConnected: ");
     }
 
+    // ! Currently, this function is not used
     private static void findPopups (AccessibilityNodeInfo nodeInfo) {
         // If the node is a leaf node, return
         if (nodeInfo.getChildCount() == 0) {
