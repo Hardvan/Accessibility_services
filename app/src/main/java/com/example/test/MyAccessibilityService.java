@@ -52,49 +52,20 @@ public class MyAccessibilityService extends AccessibilityService {
             // * Click event
             case AccessibilityEvent.TYPE_VIEW_CLICKED:
                 eventTypeStr = "Click";
-                // Log.i(TAG, "Event type: " + eventTypeStr);
                 eventDetailsMap.put("eventTypeStr", eventTypeStr);
 
-                AccessibilityNodeInfo sourceNode = event.getSource();
-
-                // ? Get the location of the click
-                if (sourceNode != null) {
-                    Rect bounds = new Rect();
-                    sourceNode.getBoundsInScreen(bounds);
-                    touchX = bounds.centerX();
-                    touchY = bounds.centerY();
-                    // Log.i(TAG, "Touch Location is X=" + touchX + " Y=" + touchY);
-                    eventDetailsMap.put("touchX", String.valueOf(touchX));
-                    eventDetailsMap.put("touchY", String.valueOf(touchY));
-                }
                 break;
 
             // * Long click event
             case AccessibilityEvent.TYPE_VIEW_LONG_CLICKED:
-
                 eventTypeStr = "Long Click";
-                // Log.i(TAG, "Event type: " + eventTypeStr);
                 eventDetailsMap.put("eventTypeStr", eventTypeStr);
 
-                AccessibilityNodeInfo sourceNode2 = event.getSource();
-
-                // ? Get the location of the long click
-                if (sourceNode2 != null) {
-                    Rect bounds = new Rect();
-                    sourceNode2.getBoundsInScreen(bounds);
-                    touchX = bounds.centerX();
-                    touchY = bounds.centerY();
-                    // Log.i(TAG, "Touch Location is X=" + touchX + " Y=" + touchY);
-                    eventDetailsMap.put("touchX", String.valueOf(touchX));
-                    eventDetailsMap.put("touchY", String.valueOf(touchY));
-                }
                 break;
 
             // * Window state changed event
             case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-
                 eventTypeStr = "Window State Changed";
-                // Log.i(TAG, "Event type: " + eventTypeStr);
                 eventDetailsMap.put("eventTypeStr", eventTypeStr);
 
                 // Detect if the app has crashed
@@ -108,21 +79,23 @@ public class MyAccessibilityService extends AccessibilityService {
 
             default:
                 eventTypeStr = "Other";
-                // Log.i(TAG, "Event type: " + eventTypeStr);
                 eventDetailsMap.put("eventTypeStr", eventTypeStr);
 
                 break;
         }
 
-        // Get the event's resource-id, text, content-desc, index
+        // Get the event's resource-id, text, content-desc, index, touchX, touchY
         AccessibilityNodeInfo sourceNode = event.getSource();
         if (sourceNode != null) {
+            // Resource-id
             String resourceId = String.valueOf(sourceNode.getViewIdResourceName());
             eventDetailsMap.put("resourceId", resourceId);
 
+            // content-desc
             CharSequence contentDesc = sourceNode.getContentDescription();
             eventDetailsMap.put("contentDesc", String.valueOf(contentDesc));
 
+            // Row, Column index
             AccessibilityNodeInfo.CollectionItemInfo collectionItemInfo = sourceNode.getCollectionItemInfo();
             if (collectionItemInfo != null) {
                 int rowIndex = collectionItemInfo.getRowIndex();
@@ -131,17 +104,29 @@ public class MyAccessibilityService extends AccessibilityService {
                 int columnIndex = collectionItemInfo.getColumnIndex();
                 eventDetailsMap.put("columnIndex", String.valueOf(columnIndex));
             }
+
+            // For touchX and touchY
+            Rect bounds = new Rect();
+            sourceNode.getBoundsInScreen(bounds);
+            touchX = bounds.centerX();
+            touchY = bounds.centerY();
+            eventDetailsMap.put("touchX", String.valueOf(touchX));
+            eventDetailsMap.put("touchY", String.valueOf(touchY));
         }
 
         // Iterate through the HashMap and print the details of the event
         boolean is_other = Objects.equals(eventDetailsMap.get("eventTypeStr"), "Other");
         if (!is_other) {
-            for (String key : eventDetailsMap.keySet()) {
-                String value = eventDetailsMap.get(key);
-                Log.i(TAG, key + " : " + value);
-            }
-            Log.i(TAG, "------------------");
+            displayEventsMap(eventDetailsMap);
         }
+    }
+
+    public void displayEventsMap(HashMap<String, String> eventDetailsMap) {
+        for (String key : eventDetailsMap.keySet()) {
+            String value = eventDetailsMap.get(key);
+            Log.i(TAG, key + " : " + value);
+        }
+        Log.i(TAG, "------------------");
     }
 
     @Override
