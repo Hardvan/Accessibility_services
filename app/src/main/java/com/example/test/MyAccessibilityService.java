@@ -30,6 +30,9 @@ public class MyAccessibilityService extends AccessibilityService {
         String eventText = String.valueOf(event.getText());
         eventDetailsMap.put("eventText", eventText);
 
+        String eventPackageName = String.valueOf(event.getPackageName());
+        eventDetailsMap.put("eventPackageName", eventPackageName);
+
         boolean check_empty = eventText.contains("[]");
         boolean check_notification = eventText.contains("Notification");
         boolean check_quick_settings = eventText.contains("Quick setting");
