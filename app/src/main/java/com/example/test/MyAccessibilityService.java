@@ -30,6 +30,7 @@ public class MyAccessibilityService extends AccessibilityService {
         String eventText = String.valueOf(event.getText());
         eventDetailsMap.put("eventText", eventText);
 
+        // ? Get the package name of the event
         String eventPackageName = String.valueOf(event.getPackageName());
         eventDetailsMap.put("eventPackageName", eventPackageName);
 
@@ -56,6 +57,26 @@ public class MyAccessibilityService extends AccessibilityService {
             // * Long click event
             case AccessibilityEvent.TYPE_VIEW_LONG_CLICKED:
                 eventTypeStr = "Long Click";
+                eventDetailsMap.put("eventTypeStr", eventTypeStr);
+                break;
+
+            case AccessibilityEvent.TYPE_VIEW_FOCUSED:
+                eventTypeStr = "Focused";
+                eventDetailsMap.put("eventTypeStr", eventTypeStr);
+                break;
+
+            case AccessibilityEvent.TYPE_VIEW_SELECTED:
+                eventTypeStr = "Selected";
+                eventDetailsMap.put("eventTypeStr", eventTypeStr);
+                break;
+
+            case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
+                eventTypeStr = "Text Changed";
+                eventDetailsMap.put("eventTypeStr", eventTypeStr);
+                break;
+
+            case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED:
+                eventTypeStr = "Text Selection Changed";
                 eventDetailsMap.put("eventTypeStr", eventTypeStr);
                 break;
 
@@ -118,11 +139,13 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     public void displayEventsMap(HashMap<String, String> eventDetailsMap) {
+
         for (String key : eventDetailsMap.keySet()) {
             String value = eventDetailsMap.get(key);
             Log.i(TAG, key + " : " + value);
         }
         Log.i(TAG, "------------------");
+
     }
 
     @Override
