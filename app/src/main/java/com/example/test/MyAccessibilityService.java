@@ -34,6 +34,10 @@ public class MyAccessibilityService extends AccessibilityService {
         String eventPackageName = String.valueOf(event.getPackageName());
         eventDetailsMap.put("eventPackageName", eventPackageName);
 
+        // ? Get event index
+        int eventIndex = event.getFromIndex();
+        eventDetailsMap.put("eventIndex", String.valueOf(eventIndex));
+
         boolean check_empty = eventText.contains("[]");
         boolean check_notification = eventText.contains("Notification");
         boolean check_quick_settings = eventText.contains("Quick setting");
@@ -112,14 +116,14 @@ public class MyAccessibilityService extends AccessibilityService {
             eventDetailsMap.put("contentDesc", String.valueOf(contentDesc));
 
             // Row, Column index
-            AccessibilityNodeInfo.CollectionItemInfo collectionItemInfo = sourceNode.getCollectionItemInfo();
-            if (collectionItemInfo != null) {
-                int rowIndex = collectionItemInfo.getRowIndex();
-                eventDetailsMap.put("rowIndex", String.valueOf(rowIndex));
-
-                int columnIndex = collectionItemInfo.getColumnIndex();
-                eventDetailsMap.put("columnIndex", String.valueOf(columnIndex));
-            }
+//            AccessibilityNodeInfo.CollectionItemInfo collectionItemInfo = sourceNode.getCollectionItemInfo();
+//            if (collectionItemInfo != null) {
+//                int rowIndex = collectionItemInfo.getRowIndex();
+//                eventDetailsMap.put("rowIndex", String.valueOf(rowIndex));
+//
+//                int columnIndex = collectionItemInfo.getColumnIndex();
+//                eventDetailsMap.put("columnIndex", String.valueOf(columnIndex));
+//            }
 
             // For touchX and touchY
             Rect bounds = new Rect();
