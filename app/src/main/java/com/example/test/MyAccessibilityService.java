@@ -21,7 +21,6 @@ public class MyAccessibilityService extends AccessibilityService {
     @SuppressLint({"SuspiciousIndentation", "SwitchIntDef"})
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        //Log.e(TAG, "onAccessibilityEvent: ");t
 
         // ? HashMap to store the details of the event
         HashMap<String, String> eventDetailsMap = new HashMap<>();
@@ -134,7 +133,7 @@ public class MyAccessibilityService extends AccessibilityService {
             eventDetailsMap.put("touchY", String.valueOf(touchY));
         }
 
-        // Iterate through the HashMap and print the details of the event
+        // Display the details of the event only if the event is not "Other"
         boolean is_other = Objects.equals(eventDetailsMap.get("eventTypeStr"), "Other");
         if (!is_other) {
             displayEventsMap(eventDetailsMap);
@@ -144,12 +143,12 @@ public class MyAccessibilityService extends AccessibilityService {
 
     public void displayEventsMap(HashMap<String, String> eventDetailsMap) {
 
+        // Iterate through the HashMap and print the details of the event
         for (String key : eventDetailsMap.keySet()) {
             String value = eventDetailsMap.get(key);
             Log.i(TAG, key + " : " + value);
         }
         Log.i(TAG, "------------------");
-
     }
 
     @Override
