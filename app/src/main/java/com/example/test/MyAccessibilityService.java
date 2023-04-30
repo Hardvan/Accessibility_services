@@ -131,6 +131,10 @@ public class MyAccessibilityService extends AccessibilityService {
             int touchY = bounds.centerY();
             eventDetailsMap.put("touchX", String.valueOf(touchX));
             eventDetailsMap.put("touchY", String.valueOf(touchY));
+
+            // Store the current time as the event time in format DD/MM/YYYY HH:MM:SS
+            String eventTime = java.text.DateFormat.getDateTimeInstance().format(System.currentTimeMillis());
+            eventDetailsMap.put("eventTime", eventTime);
         }
 
         // Display the details of the event only if the event is not "Other"
