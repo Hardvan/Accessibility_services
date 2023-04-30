@@ -5,7 +5,7 @@ automate UI testing.
 
 ## Team Members
 
-1. Pradhan
+1. Pradhaan
 2. Hardik
 3. Karan
 4. Shreya
