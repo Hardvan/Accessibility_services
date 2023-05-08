@@ -9,8 +9,14 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.regex.Pattern;
+
 
 // ? Press Ctrl+Alt+L to format the code
 
@@ -21,6 +27,7 @@ public class MyAccessibilityService extends AccessibilityService {
     @SuppressLint({"SuspiciousIndentation", "SwitchIntDef"})
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        //Log.e(TAG, "onAccessibilityEvent: ");t
 
         // ? HashMap to store the details of the event
         HashMap<String, String> eventDetailsMap = new HashMap<>();
@@ -88,6 +95,10 @@ public class MyAccessibilityService extends AccessibilityService {
                 eventTypeStr = "Window State Changed";
                 eventDetailsMap.put("eventTypeStr", eventTypeStr);
 
+                //CPU utilization and temperature
+                thermal();
+                cpu_util();
+
                 // Detect if the app has crashed
                 AccessibilityNodeInfo rootNodeInfo = getRootInActiveWindow();
                 String packageName = event.getPackageName().toString();
@@ -131,13 +142,9 @@ public class MyAccessibilityService extends AccessibilityService {
             int touchY = bounds.centerY();
             eventDetailsMap.put("touchX", String.valueOf(touchX));
             eventDetailsMap.put("touchY", String.valueOf(touchY));
-
-            // Store the current time as the event time in format DD/MM/YYYY HH:MM:SS
-            String eventTime = java.text.DateFormat.getDateTimeInstance().format(System.currentTimeMillis());
-            eventDetailsMap.put("eventTime", eventTime);
         }
 
-        // Display the details of the event only if the event is not "Other"
+        // Iterate through the HashMap and print the details of the event
         boolean is_other = Objects.equals(eventDetailsMap.get("eventTypeStr"), "Other");
         if (!is_other) {
             displayEventsMap(eventDetailsMap);
@@ -147,12 +154,12 @@ public class MyAccessibilityService extends AccessibilityService {
 
     public void displayEventsMap(HashMap<String, String> eventDetailsMap) {
 
-        // Iterate through the HashMap and print the details of the event
         for (String key : eventDetailsMap.keySet()) {
             String value = eventDetailsMap.get(key);
             Log.i(TAG, key + " : " + value);
         }
         Log.i(TAG, "------------------");
+
     }
 
     @Override
@@ -194,4 +201,100 @@ public class MyAccessibilityService extends AccessibilityService {
             }
         }
     }
+
+    public static float thermal()
+    {
+        Process process;
+        try {
+            //running a shell command to extract data in temperature file
+            process = Runtime.getRuntime().exec("cat /sys/devices/virtual/thermal/thermal_zone0/temp");
+            process.waitFor();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = reader.readLine();
+            float temp;
+            if (line != null) {
+                temp = Float.parseFloat(line);
+                //getting the type of temperature
+                String s=thermalType(0);
+                //dividing by 1000 because of the way data is stored in files
+                Log.e(TAG, "The "+s+" temperature is:"+String.valueOf(temp/1000.0f));
+                return 1;
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+        return 1;
+
+    }
+    public static String thermalType(int i) {
+        Process process;
+        BufferedReader reader;
+        String line, type = null;
+        try {
+            //getting the type of temperature
+            process = Runtime.getRuntime().exec("cat sys/class/thermal/thermal_zone" + i + "/type");
+            process.waitFor();
+            reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            line = reader.readLine();
+            if (line != null) {
+                type=line;
+            }
+            reader.close();
+            process.destroy();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return type;
+    }
+    public static void cpu_util() {
+        Process process;
+        BufferedReader reader;
+        String line, type = null;
+        for(int i=0;i<getNumCores();i++) {
+
+            try {
+                //getting CPU utilization
+                process = Runtime.getRuntime().exec("cat /sys/devices/system/cpu/cpu"+String.valueOf(i)+"/cpufreq/scaling_cur_freq");
+                process.waitFor();
+                reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                line = reader.readLine();
+                if (line != null) {
+                    Log.e(TAG, "Core "+(i+1)+":"+(Float.parseFloat(line)/1000000));
+                }
+                reader.close();
+                process.destroy();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+    public static int getNumCores() {
+        //Private Class to display only CPU devices in the directory listing
+        class CpuFilter implements FileFilter {
+            @Override
+            public boolean accept(File pathname) {
+                //Check if filename is "cpu", followed by a single digit number
+                if(Pattern.matches("cpu[0-9]+", pathname.getName())) {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        try {
+            //Get directory containing CPU info
+            File dir = new File("/sys/devices/system/cpu/");
+            //Filter to only list the devices we care about
+            File[] files = dir.listFiles(new CpuFilter());
+            //Return the number of cores (virtual CPU devices)
+            return files.length;
+        } catch(Exception e) {
+            //Default to return 1 core
+            return 1;
+        }
+    }
 }
+
