@@ -202,66 +202,86 @@ public class MyAccessibilityService extends AccessibilityService {
         }
     }
 
-    public static float thermal()
-    {
-        Process process;
+    public static float thermal() {
+        Process process; // Process to run the shell command
         try {
-            //running a shell command to extract data in temperature file
+            // Running a shell command to extract data in temperature file
             process = Runtime.getRuntime().exec("cat /sys/devices/virtual/thermal/thermal_zone0/temp");
+            // Waiting for the command to complete
             process.waitFor();
+
+            // Reading the output of the command
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line = reader.readLine();
             float temp;
             if (line != null) {
+                // Converting the string to float
                 temp = Float.parseFloat(line);
-                //getting the type of temperature
-                String s=thermalType(0);
-                //dividing by 1000 because of the way data is stored in files
-                Log.e(TAG, "The "+s+" temperature is:"+String.valueOf(temp/1000.0f));
-                return 1;
+                // Getting the type of temperature
+                String s = thermalType(0);
+                // Dividing by 1000 because of the way data is stored in files
+                float temp_value = temp / 1000.0f;
+                Log.e(TAG, "The " + s + " temperature is:" + String.valueOf(temp_value));
 
+                return 1; // Success
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return 0;
+            return 0; // Failure
         }
-        return 1;
 
+        return 1; // Success
     }
+
     public static String thermalType(int i) {
         Process process;
         BufferedReader reader;
         String line, type = null;
         try {
-            //getting the type of temperature
+            // Getting the type of temperature
             process = Runtime.getRuntime().exec("cat sys/class/thermal/thermal_zone" + i + "/type");
+            // Waiting for the command to complete
             process.waitFor();
+
+            // Reading the output of the command
             reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             line = reader.readLine();
             if (line != null) {
-                type=line;
+                type = line; // Storing the type of temperature
             }
+
+            // Closing the reader and destroying the process
             reader.close();
             process.destroy();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return type;
     }
+
     public static void cpu_util() {
         Process process;
         BufferedReader reader;
         String line, type = null;
-        for(int i=0;i<getNumCores();i++) {
+
+        int total_cores = getNumCores(); // Getting the number of cores
+        for (int i = 0; i < total_cores; i++) {
 
             try {
-                //getting CPU utilization
-                process = Runtime.getRuntime().exec("cat /sys/devices/system/cpu/cpu"+String.valueOf(i)+"/cpufreq/scaling_cur_freq");
+                // ? Getting CPU utilization
+                // Running a shell command to extract data in temperature file
+                process = Runtime.getRuntime().exec("cat /sys/devices/system/cpu/cpu" + String.valueOf(i) + "/cpufreq/scaling_cur_freq");
+                // Waiting for the command to complete
                 process.waitFor();
+
+                // Reading the output of the command
                 reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
                 line = reader.readLine();
                 if (line != null) {
-                    Log.e(TAG, "Core "+(i+1)+":"+(Float.parseFloat(line)/1000000));
+                    int core_num = i + 1;
+                    float cpu_util = Float.parseFloat(line) / 1000000;
+                    Log.e(TAG, "Core " + (core_num) + ":" + String.valueOf(cpu_util) + " GHz");
                 }
                 reader.close();
                 process.destroy();
@@ -269,30 +289,27 @@ public class MyAccessibilityService extends AccessibilityService {
                 e.printStackTrace();
             }
         }
-
     }
+
     public static int getNumCores() {
-        //Private Class to display only CPU devices in the directory listing
+        // Private Class to display only CPU devices in the directory listing
         class CpuFilter implements FileFilter {
             @Override
             public boolean accept(File pathname) {
-                //Check if filename is "cpu", followed by a single digit number
-                if(Pattern.matches("cpu[0-9]+", pathname.getName())) {
-                    return true;
-                }
-                return false;
+                // Check if filename is "cpu", followed by a single digit number
+                return Pattern.matches("cpu[0-9]+", pathname.getName());
             }
         }
 
         try {
-            //Get directory containing CPU info
+            // Get directory containing CPU info
             File dir = new File("/sys/devices/system/cpu/");
-            //Filter to only list the devices we care about
+            // Filter to only list the devices we care about
             File[] files = dir.listFiles(new CpuFilter());
-            //Return the number of cores (virtual CPU devices)
+            // Return the number of cores (virtual CPU devices)
             return files.length;
-        } catch(Exception e) {
-            //Default to return 1 core
+        } catch (Exception e) {
+            // Default to return 1 core
             return 1;
         }
     }
