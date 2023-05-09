@@ -12,6 +12,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Objects;
@@ -98,6 +99,8 @@ public class MyAccessibilityService extends AccessibilityService {
                 //CPU utilization and temperature
                 thermal();
                 cpu_util();
+                getCPUMemoryUtilization();
+                getapputil();
 
                 // Detect if the app has crashed
                 AccessibilityNodeInfo rootNodeInfo = getRootInActiveWindow();
@@ -182,7 +185,7 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     // ! Currently, this function is not used
-    private static void findPopups(AccessibilityNodeInfo nodeInfo) {
+    private static void findChildren(AccessibilityNodeInfo nodeInfo) {
         // If the node is a leaf node, return
         if (nodeInfo.getChildCount() == 0) {
             return;
@@ -191,13 +194,16 @@ public class MyAccessibilityService extends AccessibilityService {
         // ? Check if the node is a popup
         for (int i = 0; i < nodeInfo.getChildCount(); i++) {
             AccessibilityNodeInfo childNodeInfo = nodeInfo.getChild(i);
-
             boolean check_popup = childNodeInfo.getClassName().equals("PopupWindow");
+            if(childNodeInfo.getClassName()!=null)
+            {
+                Log.e(TAG, (String) childNodeInfo.getClassName());
+            }
             if (check_popup) {
                 Log.i(TAG, "Popup detected");
             } else {
                 Log.e(TAG, childNodeInfo.getClassName().toString());
-                findPopups(childNodeInfo); // Recursively check the children of the node
+                findChildren(childNodeInfo); // Recursively check the children of the node
             }
         }
     }
@@ -313,5 +319,43 @@ public class MyAccessibilityService extends AccessibilityService {
             return 1;
         }
     }
+    public static float getCPUMemoryUtilization() {
+        try {
+            Process process = Runtime.getRuntime().exec("cat /proc/meminfo");
+            process.waitFor();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Log.e(TAG,line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        return 0.0f; // Default value in case of an error
+    }
+    public static float getapputil() {
+        try {
+            Process process = Runtime.getRuntime().exec("top -n 1");
+            process.waitFor();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Log.e(TAG,line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        return 0.0f; // Default value in case of an error
+    }
+
+
 }
 
