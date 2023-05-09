@@ -16,13 +16,16 @@ import androidx.core.content.ContextCompat;
 public class MainActivity extends AppCompatActivity {
 
 
-    private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+    private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1; // Variable to store the permission request code
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
-        Button allowperm=findViewById(R.id.button);
+        Button allow_perm = findViewById(R.id.button);
+
+        // Check if the permission is already granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             // Permission is not granted
@@ -31,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
         }
-        allowperm.setOnClickListener(new View.OnClickListener() {
+        allow_perm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
