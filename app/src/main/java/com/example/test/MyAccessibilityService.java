@@ -1,5 +1,10 @@
 package com.example.test;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
@@ -15,6 +20,7 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -320,6 +326,8 @@ public class MyAccessibilityService extends AccessibilityService {
         }
     }
     public static float getCPUMemoryUtilization() {
+
+        HashMap<String, String> memInfoMap = new HashMap<>();
         try {
             Process process = Runtime.getRuntime().exec("cat /proc/meminfo");
             process.waitFor();
@@ -327,7 +335,18 @@ public class MyAccessibilityService extends AccessibilityService {
 
             String line;
             while ((line = reader.readLine()) != null) {
-                Log.e(TAG,line);
+                String[] parts = line.split(":");
+                if(parts.length == 2){
+                    String key = parts[0].trim();
+                    String value = parts[1].trim();
+                    memInfoMap.put(key, value);
+                }
+//                Log.e(TAG,line);
+            }
+            for(Map.Entry<String, String> entry : memInfoMap.entrySet()){
+                String key = entry.getKey();
+                String value = entry.getValue();
+                Log.e(TAG, key + ": "+ value);
             }
         } catch (IOException e) {
             e.printStackTrace();
