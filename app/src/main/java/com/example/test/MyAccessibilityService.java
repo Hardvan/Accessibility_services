@@ -102,7 +102,7 @@ public class MyAccessibilityService extends AccessibilityService {
                 eventTypeStr = "Window State Changed";
                 eventDetailsMap.put("eventTypeStr", eventTypeStr);
 
-                //CPU utilization and temperature
+                // ? CPU temperature, CPU utilization, Memory utilization, App utilization
                 thermal();
                 cpu_util();
                 getCPUMemoryUtilization();
@@ -153,7 +153,7 @@ public class MyAccessibilityService extends AccessibilityService {
             eventDetailsMap.put("touchY", String.valueOf(touchY));
         }
 
-        // Iterate through the HashMap and print the details of the event
+        // Display the details of the event only if the event is not of type "Other"
         boolean is_other = Objects.equals(eventDetailsMap.get("eventTypeStr"), "Other");
         if (!is_other) {
             displayEventsMap(eventDetailsMap);
@@ -162,13 +162,13 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     public void displayEventsMap(HashMap<String, String> eventDetailsMap) {
-
+        // Iterate through the HashMap and print the details of the event
+        Log.i(TAG, "------------------");
         for (String key : eventDetailsMap.keySet()) {
             String value = eventDetailsMap.get(key);
             Log.i(TAG, key + " : " + value);
         }
         Log.i(TAG, "------------------");
-
     }
 
     @Override
@@ -201,8 +201,7 @@ public class MyAccessibilityService extends AccessibilityService {
         for (int i = 0; i < nodeInfo.getChildCount(); i++) {
             AccessibilityNodeInfo childNodeInfo = nodeInfo.getChild(i);
             boolean check_popup = childNodeInfo.getClassName().equals("PopupWindow");
-            if(childNodeInfo.getClassName()!=null)
-            {
+            if (childNodeInfo.getClassName() != null) {
                 Log.e(TAG, (String) childNodeInfo.getClassName());
             }
             if (check_popup) {
@@ -214,11 +213,10 @@ public class MyAccessibilityService extends AccessibilityService {
         }
     }
 
-    public static float thermal() {
-        Process process; // Process to run the shell command
+    public static int thermal() {
         try {
             // Running a shell command to extract data in temperature file
-            process = Runtime.getRuntime().exec("cat /sys/devices/virtual/thermal/thermal_zone0/temp");
+            Process process = Runtime.getRuntime().exec("cat /sys/devices/virtual/thermal/thermal_zone0/temp");
             // Waiting for the command to complete
             process.waitFor();
 
@@ -227,13 +225,11 @@ public class MyAccessibilityService extends AccessibilityService {
             String line = reader.readLine();
             float temp;
             if (line != null) {
-                // Converting the string to float
-                temp = Float.parseFloat(line);
-                // Getting the type of temperature
-                String s = thermalType(0);
-                // Dividing by 1000 because of the way data is stored in files
-                float temp_value = temp / 1000.0f;
-                Log.e(TAG, "The " + s + " temperature is:" + String.valueOf(temp_value));
+                temp = Float.parseFloat(line); // Converting the string to float
+                String s = thermalType(0); // Getting the type of temperature
+                float temp_value = temp / 1000.0f; // Dividing by 1000 because of the way data is stored in files
+
+                Log.i(TAG, "The " + s + " temperature is:" + temp_value);
 
                 return 1; // Success
             }
@@ -246,18 +242,16 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     public static String thermalType(int i) {
-        Process process;
-        BufferedReader reader;
-        String line, type = null;
+        String type = null;
         try {
             // Getting the type of temperature
-            process = Runtime.getRuntime().exec("cat sys/class/thermal/thermal_zone" + i + "/type");
+            Process process = Runtime.getRuntime().exec("cat sys/class/thermal/thermal_zone" + i + "/type");
             // Waiting for the command to complete
             process.waitFor();
 
             // Reading the output of the command
-            reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            line = reader.readLine();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = reader.readLine();
             if (line != null) {
                 type = line; // Storing the type of temperature
             }
@@ -273,28 +267,24 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     public static void cpu_util() {
-        Process process;
-        BufferedReader reader;
-        String line, type = null;
-
         int total_cores = getNumCores(); // Getting the number of cores
         for (int i = 0; i < total_cores; i++) {
-
             try {
                 // ? Getting CPU utilization
-                // Running a shell command to extract data in temperature file
-                process = Runtime.getRuntime().exec("cat /sys/devices/system/cpu/cpu" + String.valueOf(i) + "/cpufreq/scaling_cur_freq");
+                // Running a shell command to extract data
+                Process process = Runtime.getRuntime().exec("cat /sys/devices/system/cpu/cpu" + i + "/cpufreq/scaling_cur_freq");
                 // Waiting for the command to complete
                 process.waitFor();
 
                 // Reading the output of the command
-                reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                line = reader.readLine();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line = reader.readLine();
                 if (line != null) {
-                    int core_num = i + 1;
-                    float cpu_util = Float.parseFloat(line) / 1000000;
-                    Log.e(TAG, "Core " + (core_num) + ":" + String.valueOf(cpu_util) + " GHz");
+                    int core_num = i + 1; // Getting the core number
+                    float cpu_util = Float.parseFloat(line) / 1000000; // Calculating the CPU utilization
+                    Log.i(TAG, "Core " + (core_num) + ":" + cpu_util + " GHz");
                 }
+
                 reader.close();
                 process.destroy();
             } catch (Exception e) {
@@ -325,16 +315,22 @@ public class MyAccessibilityService extends AccessibilityService {
             return 1;
         }
     }
+
     public static float getCPUMemoryUtilization() {
 
         HashMap<String, String> memInfoMap = new HashMap<>();
         try {
+            // Getting CPU Memory Utilization
             Process process = Runtime.getRuntime().exec("cat /proc/meminfo");
+            // Waiting for the command to complete
             process.waitFor();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
+            // Reading the output of the command
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
+
+                Log.i(TAG, line); // Printing the output of the command
                 String[] parts = line.split(":");
                 if(parts.length == 2){
                     String key = parts[0].trim();
@@ -356,15 +352,19 @@ public class MyAccessibilityService extends AccessibilityService {
 
         return 0.0f; // Default value in case of an error
     }
+
     public static float getapputil() {
         try {
+            // Getting App Utilization
             Process process = Runtime.getRuntime().exec("top -n 1");
+            // Waiting for the command to complete
             process.waitFor();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
+            // Reading the output of the command
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-                Log.e(TAG,line);
+                Log.i(TAG, line); // Printing the output of the command
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -374,7 +374,6 @@ public class MyAccessibilityService extends AccessibilityService {
 
         return 0.0f; // Default value in case of an error
     }
-
 
 }
 
