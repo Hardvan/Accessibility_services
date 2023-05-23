@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
@@ -34,7 +35,7 @@ public class MyAccessibilityService extends AccessibilityService {
     @SuppressLint({"SuspiciousIndentation", "SwitchIntDef"})
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        //Log.e(TAG, "onAccessibilityEvent: ");t
+        // Log.e(TAG, "onAccessibilityEvent: ");t
 
         // ? HashMap to store the details of the event
         HashMap<String, String> eventDetailsMap = new HashMap<>();
@@ -214,6 +215,7 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     public static int thermal() {
+        Log.d(TAG, "CPU TEMPERATURE\n");
         try {
             // Running a shell command to extract data in temperature file
             Process process = Runtime.getRuntime().exec("cat /sys/devices/virtual/thermal/thermal_zone0/temp");
@@ -267,6 +269,7 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     public static void cpu_util() {
+        Log.d(TAG, "CPU UTILIZATION\n");
         int total_cores = getNumCores(); // Getting the number of cores
         for (int i = 0; i < total_cores; i++) {
             try {
@@ -294,7 +297,7 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     public static int getNumCores() {
-        // Private Class to display only CPU devices in the directory listing
+        // Returns total number of cores on device
         class CpuFilter implements FileFilter {
             @Override
             public boolean accept(File pathname) {
@@ -317,7 +320,8 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     public static float getCPUMemoryUtilization() {
-
+        Log.d(TAG, "CPU MEMORY UTILIZATION\n");
+        // HashMap to store the memory info
         HashMap<String, String> memInfoMap = new HashMap<>();
         try {
             // Getting CPU Memory Utilization
@@ -329,20 +333,20 @@ public class MyAccessibilityService extends AccessibilityService {
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-
-                Log.i(TAG, line); // Printing the output of the command
+                // Storing the output in the HashMap
                 String[] parts = line.split(":");
-                if(parts.length == 2){
+                if (parts.length == 2) {
                     String key = parts[0].trim();
                     String value = parts[1].trim();
                     memInfoMap.put(key, value);
                 }
-//                Log.e(TAG,line);
             }
-            for(Map.Entry<String, String> entry : memInfoMap.entrySet()){
+
+            // Displaying the Memory Info
+            for (Map.Entry<String, String> entry : memInfoMap.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue();
-                Log.e(TAG, key + ": "+ value);
+                Log.i(TAG, key + ": " + value);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -354,6 +358,7 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     public static float getapputil() {
+        Log.d(TAG, "APP UTILIZATION\n");
         try {
             // Getting App Utilization
             Process process = Runtime.getRuntime().exec("top -n 1");
